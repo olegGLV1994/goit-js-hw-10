@@ -1,5 +1,5 @@
 import './css/styles.css';
-import VALUE from './fetchCountries';
+import fetch from './fetchCountries';
 import DEBOUNCE from 'lodash.debounce';
 import Notiflix from 'notiflix';
 const DEBOUNCE_DELAY = 300;
@@ -9,48 +9,49 @@ const refs = {
   contaiter: document.querySelector('div'),
 };
 
-refs.input.addEventListener('input', DEBOUNCE(onInput, 300));
+refs.input.addEventListener('input', DEBOUNCE(searchInput, 300));
 
-function onInput(e) {
-  const value = e.target.value.trim();
-
-  if (value === '') {
+function searchInput(e) {
+  const word = e.target.value.trim();
+  if (word === '') {
     refs.contaiter.innerHTML = '';
     refs.list.innerHTML = '';
     return;
   }
 
-  VALUE.fetchCountries(value).then(onFetchCountries).catch(onFetchError);
+  fetch.fetchCountries(word).then(fetchResolve).catch(fetchError);
 }
 
-function onFetchCountries(country) {
-  const addlistCountry = country.map(countriesList).join('');
-  refs.list.innerHTML = addlistCountry;
-  const addInfoCountry = country.map(onCountry).join('');
-  refs.contaiter.innerHTML = addInfoCountry;
-  searchCounty(country);
+function fetchResolve(country) {
+  const addCountries = country.map(markupCountries).join('');
+  refs.list.innerHTML = addCountries;
+  const addCountry = country.map(markupCountry).join('');
+  refs.contaiter.innerHTML = addCountry;
+  searchCountry(country);
   console.log(country);
 }
-function onFetchError() {
+function fetchError() {
   Notiflix.Notify.failure('Oops, there is no country with that name');
 }
 
-function countriesList(addcountries) {
-  const { name, flags } = addcountries;
+function markupCountries(countries) {
+  const { name, flags } = countries;
   return `
-  <li><img src =${flags.png} width = '20' height = '15'> ${name.official}</li>`;
+  <li class='countries-item'><img src =${flags.png} width = '30' height = '20'> ${name.official}</li>`;
 }
 
-function onCountry(addcountry) {
-  const { name, flags, capital, population, languages } = addcountry;
-  return `<h1><img width = '50' src='${flags.svg}'> ${
+function markupCountry(country) {
+  const { name, flags, capital, population, languages } = country;
+  return `<h1 class='hero-tittle'><img width = '50' height = '35px' src='${
+    flags.svg
+  }'> ${
     name.official
   }</h1><p><b>Capital:</b> ${capital}</p><p><b>Population:</b> ${population}</p><p><b>Languages:</b> ${Object.values(
     languages
   )}</p>`;
 }
 
-function searchCounty(country) {
+function searchCountry(country) {
   if (country.length > 10) {
     refs.contaiter.innerHTML = '';
     refs.list.innerHTML = '';
